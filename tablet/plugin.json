@@ -1,0 +1,18 @@
+{
+  "pluginName": "草稿",
+  "description": "草稿",
+  "version": "0.0.2",
+  "author": "xiaou",
+  "logo": "logo.png",
+  "preload": "preload.js",
+  "main": "vue/index.html",
+  "features": [
+    {
+      "code": "draft",
+      "explain": "草稿",
+      "cmds": [
+        "草稿"
+      ]
+    }
+  ]
+}
