@@ -9,6 +9,16 @@
         <el-button @click="clearHandler" type="danger" icon="el-icon-delete" circle></el-button>
       </div>
       <div>
+        <div style="display: flex;">
+          <div v-for="(item, index) in colorConfigure.colors"
+               :key="index"
+               class="tags"
+               :style="{borderColor: item.color, backgroundColor: colorActive === item.id ? item.color : '#ffffff'}"
+               @click="colorClickHandler(item)"
+          />
+        </div>
+      </div>
+      <div>
         <el-button @click="refreshHandler">刷新</el-button>
         <el-button @click="convertHandler">转换</el-button>
         <el-button @click="exportHandler">导出</el-button>
@@ -29,6 +39,7 @@ export default {
     return {
       editorElement: undefined,
       resultElement: undefined,
+      colorActive: 1,
       exportFileType: {
         png: {
           mimeType: 'image/png',
@@ -46,7 +57,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['keys'])
+    ...mapState(['keys', 'colorConfigure'])
   },
   created () {
     if (window.utools) {
@@ -70,6 +81,13 @@ export default {
 
   },
   methods: {
+    colorClickHandler (item) {
+      this.colorActive = item.id
+      this.editor.penStyle = {
+        color: item.color,
+        '-myscript-pen-width': 1
+      }
+    },
     refreshHandler () {
       this.register()
     },
@@ -97,12 +115,13 @@ export default {
             }
           },
           text: {
-            smartGuide: false
+            smartGuide: true
           }
         }
       }
       this.editorElement.addEventListener('exported', (evt) => {
         const exports = evt.detail.exports
+        console.log(evt.detail)
         if (exports && exports['application/x-latex']) {
           // convertElement.disabled = false
           katex.render(this.cleanLatex(exports['application/x-latex']), this.resultElement)
@@ -126,14 +145,16 @@ export default {
           saveAs(this.base64toBlob(evt.detail.exports[this.exportFileType.png.mimeType], this.exportFileType.png.mimeType), `${Date.now()}.${this.exportFileType.png.extension}`)
         }
       })
-      iink.register(this.editorElement, configuration)
+      this.editor = iink.register(this.editorElement, configuration)
+      this.colorActive = 1
     },
     settingHandler () {
       this.$router.push({ name: 'setting' })
     },
     exportHandler () {
-      const mimeType = this.exportFileType.png.mimeType
-      this.editorElement.editor.export_([mimeType, 'application/vnd.myscript.jiix'])
+      // const mimeType = this.exportFileType.png.mimeType
+      // this.editorElement.editor.export_([mimeType, 'application/vnd.myscript.jiix'])
+      this.editorElement.editor.export_()
     },
     convertHandler () {
       this.editorElement.editor.convert()
@@ -174,6 +195,13 @@ export default {
 </script>
 
 <style scoped>
+.tags {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid;
+  margin: 12px;
+}
 #editor {
   width: 90vw;
   height: 70vh;
